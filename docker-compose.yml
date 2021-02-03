@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    container_name: zookeeper
+    expose:
+    - "2181"
+    networks:
+      - face-recognition
+
+  kafka:
+    image: wurstmeister/kafka:2.11-2.0.0
+    container_name: kafka
+    depends_on:
+    - zookeeper
+    ports:
+    - "9092:9092"
+    expose:
+    - "9093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_MESSAGE_MAX_BYTES: 2147483647
+      KAFKA_LOG_RETENTION_HOURS: 24
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 536870912
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 30000
+      KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 60000
+    networks:
+      - face-recognition
+
+  memsql:
+    image: 'memsql/cluster-in-a-box'
+    ports:
+      - 3306:3306
+      - 8080:8080
+    environment:
+      LICENSE_KEY: 'BDk2MDg0ZDM5NTcyZTQwNWE5YWY1ODU3ZmYzOTFhZjg3AAAAAAAAAAAEAAAAAAAAAAwwNQIYfc1nFHDnOhWzvCvp+uqREvyL4KtcT+2RAhkAmLq2LvSBu1nLd5zULdnbyBPoe1CXkykgAA=='
+      ROOT_PASSWORD: 'password'
+      START_AFTER_INIT: 'Y'
+    networks:
+      - face-recognition
+
+networks:
+  face-recognition:
+    driver: bridge
