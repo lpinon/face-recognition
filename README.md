@@ -1,2 +1,2 @@
-# face-recognition
-Face recognition system using simple SQL query system.
+# Simple face recognition
+Multiprocess Face recognition system made with Python using simple SQL queries + Kafka
